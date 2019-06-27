@@ -18,17 +18,19 @@ package com.stratio.khermes.utils
 
 import java.io.File
 import java.util.Properties
+
 import com.stratio.khermes.persistence.kafka.KafkaClient
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import kafka.server.{KafkaConfig, KafkaServer}
-import kafka.utils.{SystemTime, TestUtils}
+import kafka.utils.TestUtils
 import org.apache.curator.test.TestingServer
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.common.protocol.SecurityProtocol
 import org.junit.rules.TemporaryFolder
-
 import scala.util.Try
+
+import org.apache.kafka.common.network.ListenerName
+import org.apache.kafka.common.utils.SystemTime
 
 trait EmbeddedServersUtils extends LazyLogging {
   type TopicName = String
@@ -46,12 +48,12 @@ trait EmbeddedServersUtils extends LazyLogging {
       logger.debug("Starting embedded Kafka broker (with log.dirs={} and ZK ensemble at {}) ...",
         logDir, zookeeperConnectString)
 
-      val kafkaServer = TestUtils.createServer(kafkaConfig, SystemTime)
+      val kafkaServer = TestUtils.createServer(kafkaConfig, new SystemTime)
       Try {
         kafkaServer.startup
         val brokerList =
           s"""${kafkaServer.config.hostName}:${
-            Integer.toString(kafkaServer.boundPort(SecurityProtocol.PLAINTEXT))
+            Integer.toString(kafkaServer.boundPort(new ListenerName("Prueba")))
           }"""
 
         logger.debug("Startup of embedded Kafka broker at {} completed (with ZK ensemble at {}) ...",
